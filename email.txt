@@ -1,0 +1,41 @@
+📧 EmailJS Setup (Free — 200 emails/month)
+Step 1 — Create account Go to 👉 https://www.emailjs.com and sign up for free.
+
+Step 2 — Add Email Service
+
+Dashboard → Email Services → Add New Service
+Choose Gmail, connect your zaidniaz153@gmail.com account
+Copy the Service ID (e.g. service_abc123)
+Step 3 — Create Email Template
+
+Dashboard → Email Templates → Create New Template
+Set To Email → zaidniaz153@gmail.com
+Use these variables in the template body:
+From: {{from_name}} ({{reply_to}})
+Subject: {{subject}}
+Message: {{message}}
+Copy the Template ID (e.g. template_xyz789)
+Step 4 — Get Public Key
+
+Dashboard → Account → Public Key → copy it
+Step 5 — Paste the 3 IDs into the code
+
+In 
+
+index.html
+ replace:
+
+js
+publicKey: 'YOUR_PUBLIC_KEY'  →  publicKey: 'abc_XYZ...'
+In 
+
+main.js
+ replace:
+
+js
+'YOUR_SERVICE_ID'   →  'service_abc123'
+'YOUR_TEMPLATE_ID'  →  'template_xyz789'
+Once done, every contact form submission will land directly in zaidniaz153@gmail.com with the sender's name, email, subject, and message!
+
+public key: ohjYhiFgT2jG-U6_G
+service id: service_sihdjd2
