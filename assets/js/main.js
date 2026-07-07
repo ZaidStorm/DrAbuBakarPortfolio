@@ -6,7 +6,7 @@
 * License: https://bootstrapmade.com/license/
 */
 
-(function() {
+(function () {
   "use strict";
 
   /**
@@ -37,7 +37,7 @@
    * Toggle mobile nav dropdowns
    */
   document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
-    navmenu.addEventListener('click', function(e) {
+    navmenu.addEventListener('click', function (e) {
       e.preventDefault();
       this.parentNode.classList.toggle('active');
       this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
@@ -45,15 +45,6 @@
     });
   });
 
-  /**
-   * Preloader
-   */
-  const preloader = document.querySelector('#preloader');
-  if (preloader) {
-    window.addEventListener('load', () => {
-      preloader.remove();
-    });
-  }
 
   /**
    * Scroll top button
@@ -118,7 +109,7 @@
     new Waypoint({
       element: item,
       offset: '80%',
-      handler: function(direction) {
+      handler: function (direction) {
         let progress = item.querySelectorAll('.progress .progress-bar');
         progress.forEach(el => {
           el.style.width = el.getAttribute('aria-valuenow') + '%';
@@ -137,13 +128,13 @@
   /**
    * Init isotope layout and filters
    */
-  document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
+  document.querySelectorAll('.isotope-layout').forEach(function (isotopeItem) {
     let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
     let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
     let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
 
     let initIsotope;
-    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function() {
+    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function () {
       initIsotope = new Isotope(isotopeItem.querySelector('.isotope-container'), {
         itemSelector: '.isotope-item',
         layoutMode: layout,
@@ -152,8 +143,8 @@
       });
     });
 
-    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function(filters) {
-      filters.addEventListener('click', function() {
+    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function (filters) {
+      filters.addEventListener('click', function () {
         isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
         this.classList.add('filter-active');
         initIsotope.arrange({
@@ -174,23 +165,23 @@
   filterContainers.forEach(container => {
     const filtersList = container.querySelector('.portfolio-filters');
     if (!filtersList) return;
-    
+
     const items = Array.from(filtersList.querySelectorAll('li'));
     const prevBtn = container.querySelector('.filter-prev');
     const nextBtn = container.querySelector('.filter-next');
-    
+
     const ITEMS_PER_PAGE = 8;
-    
+
     if (items.length <= ITEMS_PER_PAGE || !prevBtn || !nextBtn) {
       return;
     }
-    
+
     prevBtn.classList.remove('d-none');
     nextBtn.classList.remove('d-none');
-    
+
     let currentPage = 0;
     const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-    
+
     function updatePagination() {
       items.forEach((item, index) => {
         if (index >= currentPage * ITEMS_PER_PAGE && index < (currentPage + 1) * ITEMS_PER_PAGE) {
@@ -199,25 +190,25 @@
           item.style.display = 'none';
         }
       });
-      
+
       prevBtn.disabled = currentPage === 0;
       nextBtn.disabled = currentPage === totalPages - 1;
     }
-    
+
     prevBtn.addEventListener('click', () => {
       if (currentPage > 0) {
         currentPage--;
         updatePagination();
       }
     });
-    
+
     nextBtn.addEventListener('click', () => {
       if (currentPage < totalPages - 1) {
         currentPage++;
         updatePagination();
       }
     });
-    
+
     updatePagination();
   });
 
@@ -225,7 +216,7 @@
    * Init swiper sliders
    */
   function initSwiper() {
-    document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
+    document.querySelectorAll(".init-swiper").forEach(function (swiperElement) {
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()
       );
@@ -238,11 +229,11 @@
     });
   }
 
-  window.addEventListener("load", function() {
+  window.addEventListener("load", function () {
     initSwiper();
     // Force Isotope layout recalculation after Swiper initializes
-    setTimeout(function() {
-      document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
+    setTimeout(function () {
+      document.querySelectorAll('.isotope-layout').forEach(function (isotopeItem) {
         let container = isotopeItem.querySelector('.isotope-container');
         if (container && window.Isotope && Isotope.data(container)) {
           Isotope.data(container).layout();
@@ -261,7 +252,7 @@
   /**
    * Correct scrolling position upon page load for URLs containing hash links.
    */
-  window.addEventListener('load', function(e) {
+  window.addEventListener('load', function (e) {
     if (window.location.hash) {
       if (document.querySelector(window.location.hash)) {
         setTimeout(() => {
@@ -303,8 +294,8 @@
    */
   const aboutVideo = document.getElementById('about-video');
   if (aboutVideo) {
-    const videoObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
+    const videoObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           aboutVideo.play();
         } else {
@@ -321,7 +312,7 @@
   const soundBtn = document.getElementById('video-sound-btn');
   const heroVideo = document.querySelector('.hero video');
   if (soundBtn && heroVideo) {
-    soundBtn.addEventListener('click', function() {
+    soundBtn.addEventListener('click', function () {
       heroVideo.muted = !heroVideo.muted;
       const icon = soundBtn.querySelector('i');
       if (heroVideo.muted) {
@@ -340,13 +331,13 @@
    */
   const contactForm = document.getElementById('contact-form');
   if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
+    contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
-      const loading  = document.getElementById('form-loading');
+      const loading = document.getElementById('form-loading');
       const errorMsg = document.getElementById('form-error');
       const successMsg = document.getElementById('form-success');
-      const submitBtn  = document.getElementById('submit-btn');
+      const submitBtn = document.getElementById('submit-btn');
 
       // Auto-fill the time field with current date & time
       const timeField = document.getElementById('time-field');
@@ -355,23 +346,23 @@
       }
 
       // Reset state
-      loading.style.display    = 'block';
-      errorMsg.style.display   = 'none';
+      loading.style.display = 'block';
+      errorMsg.style.display = 'none';
       successMsg.style.display = 'none';
-      submitBtn.disabled       = true;
+      submitBtn.disabled = true;
 
       // TODO: Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID'
       emailjs.sendForm('service_sihdjd2', 'template_nrzrthl', this)
-        .then(function() {
-          loading.style.display    = 'none';
+        .then(function () {
+          loading.style.display = 'none';
           successMsg.style.display = 'block';
           contactForm.reset();
           submitBtn.disabled = false;
-        }, function(error) {
-          loading.style.display  = 'none';
-          errorMsg.textContent   = 'Failed to send message. Please try again. (' + JSON.stringify(error) + ')';
+        }, function (error) {
+          loading.style.display = 'none';
+          errorMsg.textContent = 'Failed to send message. Please try again. (' + JSON.stringify(error) + ')';
           errorMsg.style.display = 'block';
-          submitBtn.disabled     = false;
+          submitBtn.disabled = false;
         });
     });
   }

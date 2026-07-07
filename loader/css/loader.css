@@ -1,0 +1,282 @@
+/* ===================================================================
+   BRAND-REVEAL PRELOADER
+   Stages: ring draws in -> fills to solid dot -> crossfades to logo mark
+           -> wordmark letters reveal -> shine sweep -> 20-step fade to page
+=================================================================== */
+
+:root {
+  --loader-glow: #0a5690;
+  --loader-fg: #ffffff;
+  --loader-fg-dim: #8a8a8a;
+
+  /* longer total runtime */
+  --loader-duration: 2000ms;
+
+  /* darker glass */
+  --glass-start: rgba(88, 69, 69, 0.026);
+  --glass-end: rgba(8, 7, 7, 0);
+  --glass-blur-start: 34px;
+
+  --ease-smooth: cubic-bezier(.65, 0, .35, 1);
+  --ease-out-soft: cubic-bezier(.22, 1, .36, 1);
+  /* gentle deceleration, no jitter/overshoot */
+}
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+}
+
+/* Two animations layered on the preloader:
+   1) glassFade — the actual dark-glass color/blur, stepped in 20 stages
+   2) glassFadeSteps — nothing visual itself, just forces the 20-step
+      timing function onto glassFade via steps(20, jump-end)
+*/
+.preloader {
+  animation: glassFade var(--loader-duration) ease-in-out forwards;
+}
+
+@keyframes glassFade {
+  0% {
+    background: var(--glass-start);
+    backdrop-filter: blur(var(--glass-blur-start));
+    -webkit-backdrop-filter: blur(var(--glass-blur-start));
+  }
+
+  100% {
+    background: var(--glass-end);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+.preloader__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgb(9, 72, 108) 0%, rgb(3, 16, 40) 65%);
+  pointer-events: none;
+  animation: glowPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    opacity: .7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.preloader.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.preloader__stage {
+  position: relative;
+  width: 260px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* -------------------------- stage 1+2: ring ------------------------ */
+.ring {
+  position: absolute;
+  transform: rotate(-90deg);
+  will-change: transform, opacity;
+  /* fade starts exactly when the mark starts popping in → true crossfade,
+     no more "both visible at once" overlap */
+  animation: ringFadeOut 350ms var(--ease-smooth) forwards;
+  animation-delay: 1000ms;
+}
+
+.ring__track,
+.ring__fill {
+  fill: none;
+  stroke-width: 4;
+}
+
+.ring__track {
+  stroke: rgba(255, 255, 255, .12);
+}
+
+.ring__fill {
+  stroke: var(--loader-fg);
+  stroke-linecap: round;
+  stroke-dasharray: 214;
+  stroke-dashoffset: 214;
+  will-change: stroke-dashoffset;
+  animation: ringDraw 900ms var(--ease-smooth) forwards;
+}
+
+@keyframes ringDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ring__dot {
+  fill: var(--loader-fg);
+  transform-origin: 40px 40px;
+  transform: scale(0);
+  will-change: transform;
+  animation: dotGrow 450ms var(--ease-out-soft) forwards;
+  animation-delay: 850ms;
+}
+
+@keyframes dotGrow {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes ringFadeOut {
+  to {
+    opacity: 0;
+    transform: rotate(-90deg) scale(.85);
+  }
+}
+
+/* ------------------------- stage 3: logo mark ----------------------- */
+.mark {
+  position: absolute;
+  fill: var(--loader-fg);
+  opacity: 0;
+  transform: scale(.6) translateX(0);
+  will-change: transform, opacity;
+  animation: markReveal 800ms var(--ease-out-soft) forwards 100ms;
+}
+
+@keyframes markReveal {
+  40% {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateX(-80px);
+  }
+}
+
+/* -------------------------- stage 4: wordmark ------------------------ */
+.wordmark {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-30px);
+  display: flex;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--loader-fg);
+}
+
+.wordmark span {
+  opacity: 0;
+  display: inline-block;
+  transform: translateY(8px);
+  will-change: transform, opacity;
+  animation: letterIn 350ms var(--ease-out-soft) forwards;
+  animation-delay: calc(600ms + (var(--i) * 50ms));
+}
+
+.wordmark__space {
+  width: 10px;
+}
+
+.wordmark__shine {
+  background: linear-gradient(100deg,
+      var(--loader-fg) 40%,
+      var(--loader-glow) 50%,
+      var(--loader-fg) 60%);
+  background-size: 220% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:
+    letterIn 350ms var(--ease-out-soft) forwards calc(800ms + (7 * 50ms)),
+    shineSweep 400ms ease forwards 1400ms;
+}
+
+@keyframes letterIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shineSweep {
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .preloader,
+  .ring,
+  .ring__fill,
+  .ring__dot,
+  .mark,
+  .wordmark span,
+  .preloader__glow,
+  .preloader__progress,
+  .preloader__progress-bar {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* -------------------------- stage 5: progress bar ------------------------ */
+.preloader__progress {
+  position: absolute;
+  bottom: 40px;
+  left: 5%;
+  width: 90%;
+  max-width: 1200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 1;
+}
+
+@media (min-width: 1334px) {
+  .preloader__progress {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.preloader__progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--loader-glow);
+  box-shadow: 0 0 15px var(--loader-glow), 0 0 5px var(--loader-glow);
+  will-change: width;
+  animation: progressFill var(--loader-duration) var(--ease-smooth) forwards;
+}
+
+@keyframes progressFill {
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}

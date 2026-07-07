@@ -1,4 +1,4 @@
-﻿import os
+import os
 import re
 
 portfolio_dir = r'd:\SE\Portfolios\Dr. AbuBakar\iPortfolio-1.0.0\assets\portfolio'
