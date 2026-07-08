@@ -1,102 +1,105 @@
 import os
 import re
+import json
 
-portfolio_dir = r'd:\SE\Portfolios\Dr. AbuBakar\iPortfolio-1.0.0\assets\portfolio'
-folders = [f for f in os.listdir(portfolio_dir) if os.path.isdir(os.path.join(portfolio_dir, f))]
+# Setup paths relative to the script location
+base_dir = os.path.dirname(os.path.abspath(__file__))
+portfolio_dir = os.path.join(base_dir, 'assets', 'portfolio')
+index_path = os.path.join(base_dir, 'index.html')
+data_js_path = os.path.join(base_dir, 'assets', 'js', 'portfolio-data.js')
 
-html_output = []
+if not os.path.isdir(portfolio_dir):
+    print(f"Error: Could not find portfolio directory at {portfolio_dir}")
+    exit(1)
 
-filter_mapping = {
-    'Surgeries': 'filter-surgeries',
-    'Crowns': 'filter-crowns',
-    'Dental Filling': 'filter-dental-filling',
-    'Implants': 'filter-implants',
-    'Prostho Cases': 'filter-prostho',
-    'Scaling and Polishing': 'filter-scaling',
-    'Stamp Technique(Fillling)': 'filter-stamp',
-    'Tooth Extractions': 'filter-extractions'
-}
+# Scan and identify non-empty folders
+all_folders = [f for f in os.listdir(portfolio_dir) if os.path.isdir(os.path.join(portfolio_dir, f))]
+folders = []
+for folder in all_folders:
+    folder_path = os.path.join(portfolio_dir, folder)
+    valid_files = [x for x in os.listdir(folder_path) if not x.startswith('.') and os.path.isfile(os.path.join(folder_path, x))]
+    if valid_files:
+        folders.append(folder)
 
-# The specific 5 items to be shown in the "Random" tab
-random_items = [
-    r'assets/portfolio/Surgeries/WhatsApp Image 2026-07-06 at 12.53.31 PM (1).jpeg',
-    r'assets/portfolio/Crowns/WhatsApp Image 2026-07-06 at 12.49.24 PM.jpeg',
-    r'assets/portfolio/Crowns/WhatsApp Image 2026-07-06 at 12.49.25 PM.jpeg',
-    r'assets/portfolio/Prostho Cases/WhatsApp Video 2026-07-06 at 12.58.08 PM (2).mp4',
-    r'assets/portfolio/Scaling and Polishing/WhatsApp Video 2026-07-06 at 12.55.27 PM.mp4'
-]
+has_random = 'Random' in folders
+other_folders = sorted([f for f in folders if f != 'Random'], key=lambda s: s.lower())
 
-for folder in sorted(folders):
-    filter_class = filter_mapping.get(folder, 'filter-' + folder.lower().replace(' ', '-'))
-    display_name = folder
-    if folder == 'Stamp Technique(Fillling)':
-        display_name = 'Stamp Technique'
+# Build the filters HTML list
+filter_items_html = []
+if has_random:
+    filter_items_html.append('              <li data-filter=".filter-random" class="filter-active">Random</li>')
+else:
+    filter_items_html.append('              <li data-filter="*" class="filter-active">All</li>')
+
+for folder in other_folders:
+    filter_class = "filter-" + folder.lower().replace(" ", "-").replace("(", "").replace(")", "")
+    filter_items_html.append(f'              <li data-filter=".{filter_class}">{folder}</li>')
+
+new_filters_content = '\n'.join(filter_items_html)
+
+# Build the JSON items list
+portfolio_items = []
+ordered_folders = ['Random'] + other_folders if has_random else other_folders
+
+for folder in ordered_folders:
+    filter_class = "filter-" + folder.lower().replace(" ", "-").replace("(", "").replace(")", "")
+    folder_path = os.path.join(portfolio_dir, folder)
+    files = sorted([x for x in os.listdir(folder_path) if not x.startswith('.') and os.path.isfile(os.path.join(folder_path, x))])
     
-    files = os.listdir(os.path.join(portfolio_dir, folder))
-    for file in sorted(files):
-        if file.startswith('.'):
-            continue
+    for file in files:
         rel_path = f'assets/portfolio/{folder}/{file}'
-        
-        extra_class = ' filter-random' if rel_path in random_items else ''
-        
-        html_output.append(f'            <!-- ===== {display_name.upper()} ===== -->')
-        html_output.append(f'            <div class="col-lg-4 col-md-6 portfolio-item isotope-item {filter_class}{extra_class}">')
-        html_output.append(f'              <div class="portfolio-content h-100">')
-        
         is_video = file.lower().endswith(('.mp4', '.webm', '.ogg'))
         
-        if is_video:
-            html_output.append(f'                <video muted playsinline preload="metadata" class="portfolio-thumb-video">')
-            html_output.append(f'                  <source src="{rel_path}" type="video/mp4">')
-            html_output.append(f'                </video>')
-            html_output.append(f'                <div class="portfolio-info">')
-            html_output.append(f'                  <h4>{display_name}</h4>')
-            html_output.append(f'                  <a href="{rel_path}" data-type="video" title="{display_name}" data-gallery="portfolio-gallery-{filter_class.split("-")[-1]}" class="glightbox preview-link"><i class="bi bi-play-circle-fill"></i></a>')
-            html_output.append(f'                </div>')
-        else:
-            html_output.append(f'                <img src="{rel_path}" class="img-fluid" alt="{display_name}">')
-            html_output.append(f'                <div class="portfolio-info">')
-            html_output.append(f'                  <h4>{display_name}</h4>')
-            html_output.append(f'                  <a href="{rel_path}" title="{display_name}" data-gallery="portfolio-gallery-{filter_class.split("-")[-1]}" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>')
-            html_output.append(f'                </div>')
+        portfolio_items.append({
+            "classes": filter_class,
+            "type": "video" if is_video else "image",
+            "src": rel_path,
+            "title": folder,
+            "link": rel_path,
+            "gallery": f"portfolio-gallery-{filter_class.split('-')[-1]}"
+        })
+
+# Write data list to portfolio-data.js
+js_content = f"// Automatically generated portfolio items data\nconst portfolioItems = {json.dumps(portfolio_items, indent=2)};\n"
+with open(data_js_path, 'w', encoding='utf-8') as f:
+    f.write(js_content)
+print(f"Successfully wrote {len(portfolio_items)} items to {data_js_path}")
+
+# Update index.html
+if os.path.isfile(index_path):
+    with open(index_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # 1. Replace the filters UL list content
+    filters_start_tag = '<ul class="portfolio-filters isotope-filters mb-0" data-aos="fade-up" data-aos-delay="100">'
+    filters_end_tag = '</ul><!-- End Portfolio Filters -->'
+    
+    start_idx = content.find(filters_start_tag)
+    if start_idx != -1:
+        end_idx = content.find(filters_end_tag, start_idx)
+        if end_idx != -1:
+            content = content[:start_idx + len(filters_start_tag)] + '\n' + new_filters_content + '\n            ' + content[end_idx:]
+            print("Successfully updated filters list in index.html")
+    
+    # 2. Empty the HTML isotope-container to keep index.html clean and rely on dynamic JS loading
+    container_start_tag = '<div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">'
+    container_end_tag = '</div><!-- End Portfolio Container -->'
+    
+    c_start_idx = content.find(container_start_tag)
+    if c_start_idx != -1:
+        c_end_idx = content.find(container_end_tag, c_start_idx)
+        if c_end_idx != -1:
+            content = content[:c_start_idx + len(container_start_tag)] + '\n\n          ' + content[c_end_idx:]
+            print("Successfully cleared inline isotope-container items in index.html")
             
-        html_output.append(f'              </div>')
-        html_output.append(f'            </div>')
-        html_output.append(f'')
-
-items_html = '\n'.join(html_output)
-
-with open('index.html', 'r', encoding='utf-8') as f:
-    content = f.read()
-
-# Replace the filters UL list
-filters_start = content.find('<ul class="portfolio-filters')
-filters_end = content.find('</ul><!-- End Portfolio Filters -->') + len('</ul><!-- End Portfolio Filters -->')
-
-new_filters = '''<ul class="portfolio-filters isotope-filters" data-aos="fade-up" data-aos-delay="100">
-            <li data-filter=".filter-random" class="filter-active">Random</li>
-            <li data-filter=".filter-surgeries">Surgeries</li>
-            <li data-filter=".filter-crowns">Crowns</li>
-            <li data-filter=".filter-dental-filling">Dental Filling</li>
-            <li data-filter=".filter-implants">Implants</li>
-            <li data-filter=".filter-prostho">Prostho Cases</li>
-            <li data-filter=".filter-scaling">Scaling &amp; Polishing</li>
-            <li data-filter=".filter-stamp">Stamp Technique</li>
-            <li data-filter=".filter-extractions">Tooth Extractions</li>
-          </ul><!-- End Portfolio Filters -->'''
-
-content = content[:filters_start] + new_filters + content[filters_end:]
-
-# Replace the container
-container_start = content.find('<div class="row gy-4 isotope-container"')
-container_end = content.find('</div><!-- End Portfolio Container -->')
-# Find the exact start of the content inside the container
-content_start = content.find('>', container_start) + 1
-
-content = content[:content_start] + '\n\n' + items_html + content[container_end:]
-
-with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(content)
-
-print("Done generating portfolio items.")
+    # 3. Update default filter settings
+    if has_random:
+        content = re.sub(r'data-default-filter="[^"]*"', 'data-default-filter=".filter-random"', content)
+    else:
+        content = re.sub(r'data-default-filter="[^"]*"', 'data-default-filter="*"', content)
+        
+    with open(index_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    print("Successfully updated index.html configurations.")
+else:
+    print(f"Warning: Could not find index.html at {index_path} to update.")

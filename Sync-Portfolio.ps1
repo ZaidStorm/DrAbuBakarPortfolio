@@ -1,25 +1,40 @@
-$portfolioDir = "assets/portfolio"
+$baseDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (-Not $baseDir) { $baseDir = "." }
+
+$portfolioDir = Join-Path $baseDir "assets/portfolio"
+$indexPath = Join-Path $baseDir "index.html"
+$dataJsPath = Join-Path $baseDir "assets/js/portfolio-data.js"
+
 if (-Not (Test-Path $portfolioDir)) {
     Write-Host "Error: Could not find assets/portfolio folder."
     Pause
     Exit
 }
 
-$folders = Get-ChildItem -Path $portfolioDir -Directory
+$allFolders = Get-ChildItem -Path $portfolioDir -Directory
+$folders = @()
 
-# Build Filters
-$filtersHtml = '<div class="portfolio-filters-container d-flex align-items-center justify-content-center gap-2 mb-4">' + "`n"
-$filtersHtml += '  <button class="filter-nav-btn filter-prev d-none"><i class="bi bi-chevron-left"></i></button>' + "`n"
-$filtersHtml += '  <ul class="portfolio-filters isotope-filters mb-0" data-aos="fade-up" data-aos-delay="100">' + "`n"
+foreach ($folder in $allFolders) {
+    $files = Get-ChildItem -Path $folder.FullName -File | Where-Object { -not $_.Name.StartsWith(".") }
+    if ($files.Count -gt 0) {
+        $folders += $folder
+    }
+}
 
 # Ensure "Random" is first if it exists
 $randomFolder = $folders | Where-Object { $_.Name -eq "Random" }
 $otherFolders = $folders | Where-Object { $_.Name -ne "Random" } | Sort-Object Name
 
-if ($randomFolder) {
+$hasRandom = $null -ne $randomFolder
+
+# Build Filters Container
+$filtersHtml = '<div class="portfolio-filters-container d-flex align-items-center justify-content-center gap-2 mb-4">' + "`n"
+$filtersHtml += '  <button class="filter-nav-btn filter-prev d-none"><i class="bi bi-chevron-left"></i></button>' + "`n"
+$filtersHtml += '  <ul class="portfolio-filters isotope-filters mb-0" data-aos="fade-up" data-aos-delay="100">' + "`n"
+
+if ($hasRandom) {
     $filtersHtml += '            <li data-filter=".filter-random" class="filter-active">Random</li>' + "`n"
 } else {
-    # If no random folder, make the first one active, or just keep *
     $filtersHtml += '            <li data-filter="*" class="filter-active">All</li>' + "`n"
 }
 
@@ -31,74 +46,88 @@ $filtersHtml += '  </ul><!-- End Portfolio Filters -->' + "`n"
 $filtersHtml += '  <button class="filter-nav-btn filter-next d-none"><i class="bi bi-chevron-right"></i></button>' + "`n"
 $filtersHtml += '</div><!-- End Portfolio Filters Container -->'
 
-# Build Items
-$itemsHtml = ""
-foreach ($folder in $folders) {
+# Build JSON list of items
+$orderedFolders = @()
+if ($hasRandom) {
+    $orderedFolders += $randomFolder
+}
+$orderedFolders += $otherFolders
+
+$portfolioItems = @()
+
+foreach ($folder in $orderedFolders) {
     $filterClass = "filter-" + $folder.Name.ToLower().Replace(" ", "-").Replace("(", "").Replace(")", "")
+    $gallery = "portfolio-gallery-" + $filterClass.Split("-")[-1]
     
-    $files = Get-ChildItem -Path $folder.FullName -File
-    if ($files.Count -gt 0) {
-        $itemsHtml += "            <!-- ===== " + $folder.Name.ToUpper() + " ===== -->`n"
-    }
+    $files = Get-ChildItem -Path $folder.FullName -File | Where-Object { -not $_.Name.StartsWith(".") } | Sort-Object Name
     
     foreach ($file in $files) {
         $relPath = "assets/portfolio/" + $folder.Name + "/" + $file.Name
-        $itemsHtml += '            <div class="col-lg-4 col-md-6 portfolio-item isotope-item ' + $filterClass + '">' + "`n"
-        $itemsHtml += '              <div class="portfolio-content h-100">' + "`n"
+        $isVideo = $file.Extension.ToLower() -match "\.(mp4|webm|ogg)$"
+        $type = if ($isVideo) { "video" } else { "image" }
         
-        $ext = $file.Extension.ToLower()
-        if ($ext -match "\.(mp4|webm|ogg)$") {
-            $itemsHtml += '                <video muted playsinline preload="metadata" class="portfolio-thumb-video">' + "`n"
-            $itemsHtml += '                  <source src="' + $relPath + '" type="video/mp4">' + "`n"
-            $itemsHtml += '                </video>' + "`n"
-            $itemsHtml += '                <div class="portfolio-info">' + "`n"
-            $itemsHtml += '                  <h4>' + $folder.Name + '</h4>' + "`n"
-            $itemsHtml += '                  <a href="' + $relPath + '" data-type="video" title="' + $folder.Name + '" data-gallery="portfolio-gallery-' + $filterClass.Split('-')[-1] + '" class="glightbox preview-link"><i class="bi bi-play-circle-fill"></i></a>' + "`n"
-            $itemsHtml += '                </div>' + "`n"
-        } else {
-            $itemsHtml += '                <img src="' + $relPath + '" class="img-fluid" alt="' + $folder.Name + '">' + "`n"
-            $itemsHtml += '                <div class="portfolio-info">' + "`n"
-            $itemsHtml += '                  <h4>' + $folder.Name + '</h4>' + "`n"
-            $itemsHtml += '                  <a href="' + $relPath + '" title="' + $folder.Name + '" data-gallery="portfolio-gallery-' + $filterClass.Split('-')[-1] + '" class="glightbox preview-link"><i class="bi bi-zoom-in"></i></a>' + "`n"
-            $itemsHtml += '                </div>' + "`n"
+        $item = [PSCustomObject]@{
+            classes = $filterClass
+            type    = $type
+            src     = $relPath
+            title   = $folder.Name
+            link    = $relPath
+            gallery = $gallery
         }
-        $itemsHtml += '              </div>' + "`n"
-        $itemsHtml += '            </div>' + "`n`n"
+        $portfolioItems += $item
     }
 }
 
+# Convert to JSON and save to JS file
+$json = $portfolioItems | ConvertTo-Json -Depth 5
+$jsContent = "// Automatically generated portfolio items data`nconst portfolioItems = " + $json + ";"
+Set-Content -Path $dataJsPath -Value $jsContent -Encoding UTF8
+
+Write-Host "Successfully wrote $($portfolioItems.Count) items to $dataJsPath"
+
 # Update index.html
-$content = Get-Content "index.html" -Raw
-
-# Replace filters
-$filterStart = $content.IndexOf('<div class="portfolio-filters-container')
-if ($filterStart -eq -1) {
-    $filterStart = $content.IndexOf('<ul class="portfolio-filters')
-}
-
-$filterEnd = $content.IndexOf('</div><!-- End Portfolio Filters Container -->')
-if ($filterEnd -eq -1) {
-    $filterEnd = $content.IndexOf("</ul><!-- End Portfolio Filters -->") + 35
+if (Test-Path $indexPath) {
+    $content = Get-Content $indexPath -Raw
+    
+    # 1. Replace filters
+    $filterStart = $content.IndexOf('<div class="portfolio-filters-container')
+    if ($filterStart -eq -1) {
+        $filterStart = $content.IndexOf('<ul class="portfolio-filters')
+    }
+    
+    $filterEnd = $content.IndexOf('</div><!-- End Portfolio Filters Container -->')
+    if ($filterEnd -eq -1) {
+        $filterEnd = $content.IndexOf("</ul><!-- End Portfolio Filters -->")
+        if ($filterEnd -ne -1) { $filterEnd += 35 }
+    } else {
+        $filterEnd += 46
+    }
+    
+    if ($filterStart -ne -1 -and $filterEnd -ne -1) {
+        $content = $content.Substring(0, $filterStart) + $filtersHtml + $content.Substring($filterEnd)
+    }
+    
+    # 2. Empty container
+    $containerStart = $content.IndexOf('<div class="row gy-4 isotope-container"')
+    if ($containerStart -ne -1) {
+        $containerContentStart = $content.IndexOf(">", $containerStart) + 1
+        $containerEnd = $content.IndexOf("</div><!-- End Portfolio Container -->")
+        if ($containerEnd -ne -1) {
+            $content = $content.Substring(0, $containerContentStart) + "`n`n          " + $content.Substring($containerEnd)
+        }
+    }
+    
+    # 3. Default filter
+    if ($hasRandom) {
+        $content = $content -replace 'data-default-filter="[^"]*"', 'data-default-filter=".filter-random"'
+    } else {
+        $content = $content -replace 'data-default-filter="[^"]*"', 'data-default-filter="*"'
+    }
+    
+    Set-Content $indexPath $content -Encoding UTF8 -NoNewline
+    Write-Host "Success! index.html updated."
 } else {
-    $filterEnd += 46
+    Write-Host "Warning: Could not find index.html to update."
 }
 
-$content = $content.Substring(0, $filterStart) + $filtersHtml + $content.Substring($filterEnd)
-
-# Replace items
-$containerStart = $content.IndexOf('<div class="row gy-4 isotope-container"')
-$containerContentStart = $content.IndexOf(">", $containerStart) + 1
-$containerEnd = $content.IndexOf("</div><!-- End Portfolio Container -->")
-
-$content = $content.Substring(0, $containerContentStart) + "`n`n" + $itemsHtml + "          " + $content.Substring($containerEnd)
-
-# Fix default filter
-if ($randomFolder) {
-    $content = $content -replace 'data-default-filter="[^"]*"', 'data-default-filter=".filter-random"'
-} else {
-    $content = $content -replace 'data-default-filter="[^"]*"', 'data-default-filter="*"'
-}
-
-Set-Content "index.html" $content -Encoding UTF8 -NoNewline
-Write-Host "Success! Portfolio updated."
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2

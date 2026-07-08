@@ -1,20 +1,29 @@
-﻿import re
+import os
+import re
+import json
 
-with open('index.html', 'r', encoding='utf-8') as f:
-    content = f.read()
+# Setup paths relative to the script location
+base_dir = os.path.dirname(os.path.abspath(__file__))
+data_js_path = os.path.join(base_dir, 'assets', 'js', 'portfolio-data.js')
 
-# Find the container
-start_marker = '<div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">'
-end_marker = '</div><!-- End Portfolio Container -->'
+if not os.path.isfile(data_js_path):
+    print(f"Error: Could not find {data_js_path}")
+    exit(1)
 
-start_idx = content.find(start_marker) + len(start_marker)
-end_idx = content.find(end_marker, start_idx)
+with open(data_js_path, 'r', encoding='utf-8') as f:
+    js_content = f.read()
 
-container_html = content[start_idx:end_idx]
+# Extract the JSON array
+m = re.search(r'const portfolioItems = (\[.*\]);', js_content, re.DOTALL)
+if not m:
+    print("Error: Could not find portfolioItems array in portfolio-data.js")
+    exit(1)
 
-# Split into items
-item_pattern = r'(<div class="col-lg-4 col-md-6 portfolio-item .*?</div>\s*</div>\s*</div>)'
-items = re.findall(item_pattern, container_html, re.DOTALL)
+try:
+    items = json.loads(m.group(1))
+except Exception as e:
+    print(f"Error parsing JSON from portfolio-data.js: {e}")
+    exit(1)
 
 surgeries = []
 crowns = []
@@ -22,33 +31,42 @@ prostho = []
 scaling = []
 
 for item in items:
-    if 'filter-surgeries' in item:
+    classes = item.get('classes', '')
+    if 'surgeries' in classes or 'omfs' in classes:
         surgeries.append(item)
-    elif 'filter-crowns' in item:
+    elif 'crowns' in classes:
         crowns.append(item)
-    elif 'filter-prostho' in item:
+    elif 'prostho' in classes:
         prostho.append(item)
-    elif 'filter-scaling' in item:
+    elif 'scaling' in classes or 'perio' in classes:
         scaling.append(item)
 
-# Select exactly what the user asked
+# Select items based on specified rules
 selected_items = []
-selected_items.extend(surgeries) # all surgeries
-if len(crowns) >= 2:
-    selected_items.extend(crowns[0:2]) # first two crowns
+selected_items.extend(surgeries)  # all surgeries
+
+# 2 crowns
+selected_items.extend(crowns[:2])
+
+# 8th prostho (or first available if less than 8)
 if len(prostho) >= 8:
-    selected_items.append(prostho[7]) # 8th prostho (index 7)
+    selected_items.append(prostho[7])
+elif len(prostho) > 0:
+    selected_items.append(prostho[0])
+
+# 4th scaling (or first available if less than 4)
 if len(scaling) >= 4:
-    selected_items.append(scaling[3]) # 4th scaling (index 3)
+    selected_items.append(scaling[3])
+elif len(scaling) > 0:
+    selected_items.append(scaling[0])
 
-new_container_html = "\n".join(selected_items) + "\n          "
+# Write the filtered list back to portfolio-data.js
+new_js_content = f"// Automatically generated portfolio items data\nconst portfolioItems = {json.dumps(selected_items, indent=2)};\n"
+with open(data_js_path, 'w', encoding='utf-8') as f:
+    f.write(new_js_content)
 
-new_content = content[:start_idx] + "\n\n" + new_container_html + content[end_idx:]
-
-# Rename "All" to "Random"
-new_content = new_content.replace('<li data-filter="*" class="filter-active">All</li>', '<li data-filter="*" class="filter-active">Random</li>')
-
-with open('index.html', 'w', encoding='utf-8') as f:
-    f.write(new_content)
-
-print(f"Total selected items: {len(selected_items)}")
+print(f"Successfully filtered portfolio items down to {len(selected_items)} selected items.")
+print(f"- Surgeries/OMFS: {len(surgeries)}")
+print(f"- Crowns: {min(2, len(crowns))} (out of {len(crowns)})")
+print(f"- Prostho: {1 if prostho else 0} (out of {len(prostho)})")
+print(f"- Scaling/Perio: {1 if scaling else 0} (out of {len(scaling)})")
