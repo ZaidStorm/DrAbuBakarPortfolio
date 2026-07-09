@@ -1,3 +1,13 @@
+# =============================================================================
+# RETIRED — Google Drive API integration is now live (2026-07).
+# This script is kept as a historical reference ONLY.
+#
+# To add new portfolio items: upload folders/files to the
+# "portfolio" folder in Google Drive.
+# The site updates automatically within 10 minutes (cache TTL).
+# No redeploy and no script run needed.
+# =============================================================================
+
 $baseDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-Not $baseDir) { $baseDir = "." }
 

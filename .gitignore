@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.local
+
+# Service Account Key (CRITICAL: Never commit this)
+service-account.json
+
+# Old Local Media
+assets/portfolio/
+assets/js/portfolio-data.js
+
+# OS generated files
+.DS_Store
+Thumbs.db
