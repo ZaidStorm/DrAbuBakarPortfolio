@@ -31,9 +31,11 @@ module.exports = async function handler(req, res) {
 
     const folders = result.data.files || [];
 
+    // Exclude 'videos' or 'video' folder from being a portfolio category
+    const categoryFolders = folders.filter(f => f.name.toLowerCase() !== 'videos' && f.name.toLowerCase() !== 'video');
     // Mirror Sync-Portfolio.ps1: Random first, then alphabetical
-    const random = folders.filter(f => f.name === 'Random');
-    const others = folders.filter(f => f.name !== 'Random');
+    const random = categoryFolders.filter(f => f.name === 'Random');
+    const others = categoryFolders.filter(f => f.name !== 'Random');
 
     const ordered = [...random, ...others].map(f => ({
       id:   f.id,

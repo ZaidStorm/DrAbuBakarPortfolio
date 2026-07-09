@@ -368,4 +368,51 @@
     });
   }
 
+  /**
+   * Load Hero and About videos dynamically from Google Drive (folder: 'videos')
+   */
+  async function loadDynamicVideos() {
+    try {
+      const API = window.DRIVE_API_BASE || '';
+      let res = await fetch(`${API}/api/portfolio/videos`);
+      
+      // Fallback in case the user named the folder "video" instead of "videos"
+      if (!res.ok) {
+        res = await fetch(`${API}/api/portfolio/video`);
+      }
+
+      if (!res.ok) {
+        console.warn('No videos or video folder found in Drive or API error.');
+        return;
+      }
+      
+      const data = await res.json();
+      const files = data.files || [];
+      
+      const heroFile = files.find(f => f.name.includes('herp-bg') || f.name.includes('hero'));
+      if (heroFile) {
+        const heroVideo = document.querySelector('.hero-video-wrapper video');
+        if (heroVideo) {
+          heroVideo.src = heroFile.src;
+          heroVideo.load();
+          heroVideo.play().catch(e => console.log('Autoplay blocked:', e));
+        }
+      }
+      
+      const aboutFile = files.find(f => f.name.includes('about'));
+      if (aboutFile) {
+        const aboutVideo = document.getElementById('about-video');
+        if (aboutVideo) {
+          aboutVideo.src = aboutFile.src;
+          aboutVideo.load();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load dynamic videos from Drive:', err);
+    }
+  }
+
+  // Fetch videos after page load
+  window.addEventListener('load', loadDynamicVideos);
+
 })();
