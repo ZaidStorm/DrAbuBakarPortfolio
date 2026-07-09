@@ -1,8 +1,8 @@
-﻿{
+{
   "name": "dr-abubakar-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "Dr. AbuBakar dental portfolio — static site + Google Drive media API",
+  "description": "Dr. AbuBakar dental portfolio - static site + Google Drive media API",
   "engines": { "node": ">=18" },
   "dependencies": {
     "googleapis": "^144.0.0"
