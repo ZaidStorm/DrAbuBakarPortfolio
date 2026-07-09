@@ -588,6 +588,17 @@ section,
 }
 
 @media (max-width: 768px) {
+  .hero-video-wrapper {
+    display: none;
+  }
+  .hero-sound-btn {
+    display: none;
+  }
+  .hero {
+    background: url("../img/hero-bg.jpg") top center;
+    background-size: cover;
+  }
+
   .hero h2 {
     font-size: 32px;
   }

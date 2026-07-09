@@ -7,7 +7,7 @@
  * the real page is actually ready.
  */
 (function () {
-  var MIN_DISPLAY_TIME = 2000; // keep in sync with --loader-duration
+  var MIN_DISPLAY_TIME = window.innerWidth < 768 ? 800 : 2000; // keep in sync with --loader-duration
   var preloader = document.getElementById('preloader');
 
   if (!preloader) return;

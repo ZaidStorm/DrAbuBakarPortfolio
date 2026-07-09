@@ -280,3 +280,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 767px) {
+  :root {
+    --loader-duration: 800ms;
+  }
+}
