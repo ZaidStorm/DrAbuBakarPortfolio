@@ -572,7 +572,8 @@ section,
 }
 
 .horizontal-loader {
-  width: 5in; /* exactly 5 inches */
+  width: 5in;
+  /* exactly 5 inches */
   height: 4px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
@@ -593,8 +594,13 @@ section,
 }
 
 @keyframes loading-line {
-  0% { left: -30%; }
-  100% { left: 100%; }
+  0% {
+    left: -30%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }
 
 .hero img,
@@ -617,7 +623,9 @@ section,
 
 .hero:before {
   content: "";
-  background: color-mix(in srgb, var(--background-color), transparent 70%);
+  background: rgba(27, 6, 6, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -1591,7 +1599,10 @@ section,
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
-html, body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+html,
+body {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
