@@ -33,10 +33,15 @@ function getDrive() {
 }
 
 // ── Root folder ID resolver ──────────────────────────────────────────────────
+// Hardcoded ID of the "portfolio" Google Drive folder.
+// Taken directly from: https://drive.google.com/drive/folders/1jAaGhxBxoy-7bl2KwhXxlBtQpp3d1KnO
+// Override via PORTFOLIO_ROOT_FOLDER_ID env var if the folder ever changes.
+const HARDCODED_ROOT_ID = '1jAaGhxBxoy-7bl2KwhXxlBtQpp3d1KnO';
+
 let _rootFolderId = null;
 
 async function getRootFolderId() {
-  // 1. Env var short-circuit (fastest path — set this after first deploy)
+  // 1. Env var override (if set on Vercel, takes highest priority)
   if (process.env.PORTFOLIO_ROOT_FOLDER_ID) {
     return process.env.PORTFOLIO_ROOT_FOLDER_ID;
   }
@@ -44,23 +49,8 @@ async function getRootFolderId() {
   // 2. In-memory cache (warm lambda reuse)
   if (_rootFolderId) return _rootFolderId;
 
-  // 3. Search Drive by folder name
-  const drive = getDrive();
-  const res = await drive.files.list({
-    q: `name = 'portfolio' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-    fields: 'files(id, name)',
-    pageSize: 1,
-  });
-
-  const files = res.data.files;
-  if (!files || files.length === 0) {
-    throw new Error(
-      'Drive folder "portfolio" not found. ' +
-      'Make sure the folder exists and is shared with the service account.'
-    );
-  }
-
-  _rootFolderId = files[0].id;
+  // 3. Use hardcoded ID — no Drive search needed
+  _rootFolderId = HARDCODED_ROOT_ID;
   return _rootFolderId;
 }
 
