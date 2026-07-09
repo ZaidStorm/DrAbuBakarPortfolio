@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const drive = getDrive();
-    const folderId = process.env.VIDEOS_FOLDER_ID ? process.env.VIDEOS_FOLDER_ID.trim() : HARDCODED_VIDEOS_FOLDER_ID;
+    const folderId = HARDCODED_VIDEOS_FOLDER_ID;
 
     const filesRes = await drive.files.list({
       q: `'${folderId}' in parents and trashed = false and (mimeType contains 'video/' or mimeType contains 'image/')`,
