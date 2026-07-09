@@ -374,15 +374,10 @@
   async function loadDynamicVideos() {
     try {
       const API = window.DRIVE_API_BASE || '';
-      let res = await fetch(`${API}/api/portfolio/videos`);
-      
-      // Fallback in case the user named the folder "video" instead of "videos"
-      if (!res.ok) {
-        res = await fetch(`${API}/api/portfolio/video`);
-      }
+      let res = await fetch(`${API}/api/videos`);
 
       if (!res.ok) {
-        console.warn('No videos or video folder found in Drive or API error.');
+        console.warn('Could not fetch videos from /api/videos.');
         return;
       }
       
