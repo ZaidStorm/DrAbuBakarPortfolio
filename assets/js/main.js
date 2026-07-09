@@ -390,6 +390,18 @@
         if (heroVideo) {
           heroVideo.src = heroFile.src;
           heroVideo.load();
+          
+          const handleLoaded = () => {
+            heroVideo.classList.add('is-loaded');
+            const loader = document.getElementById('hero-video-loader');
+            if (loader) loader.classList.add('hidden');
+          };
+          
+          heroVideo.addEventListener('canplay', handleLoaded);
+          if (heroVideo.readyState >= 3) {
+            handleLoaded();
+          }
+          
           heroVideo.play().catch(e => console.log('Autoplay blocked:', e));
         }
       }
