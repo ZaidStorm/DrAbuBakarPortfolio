@@ -17,3 +17,166 @@
   width: 100%;
   height: 270px;
 }
+
+:root {
+  --bg-0: #12100e;
+  --bg-1: #181613;
+  --ink-0: #f2ece1;
+  --ink-1: #a89e8f;
+  --ink-2: #6f6759;
+  --accent: #7fa896;
+  --accent-dim: rgba(127,168,150,0.14);
+  --gold: #c7a24a;
+  --line: rgba(242,236,225,0.08);
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+  /* min-height: 100vh; */
+  background:
+    radial-gradient(circle at 20% 0%, rgba(127,168,150,0.06), transparent 55%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%) !important;
+  border-right: 1px solid var(--line) !important;
+  padding: 44px 30px 30px !important;
+  position: fixed;
+}
+
+/* thin gold signature line down the far edge */
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0; right: -1px;
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, transparent, var(--gold) 18%, transparent 70%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.sidebar .profile {
+  text-align: center;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+
+.sidebar .avatar-ring {
+  width: 120px; height: 120px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from 200deg, var(--accent), var(--gold), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar .avatar-ring img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg-0);
+  display: block;
+}
+
+.sidebar .brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.03em;
+  color: var(--ink-0);
+  margin-bottom: 2px;
+}
+.sidebar .brand-tag {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.sidebar .socials {
+  display: flex; justify-content: center; gap: 10px;
+}
+.sidebar .socials a {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-1) !important;
+  background: transparent !important;
+  text-decoration: none;
+  transition: all .25s ease;
+}
+.sidebar .socials a:hover {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: var(--bg-0) !important;
+  transform: translateY(-2px);
+}
+.sidebar .socials svg { width: 15px; height: 15px; fill: currentColor; }
+
+/* ---------- NAV ---------- */
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; flex-grow: 1; }
+.sidebar nav ul { padding: 0 !important; display: flex; flex-direction: column; height: 100%; margin-bottom: 0; }
+.sidebar nav ul li { list-style: none; }
+
+.sidebar .nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px 13px 18px !important;
+  border-radius: 8px;
+  color: var(--ink-1) !important;
+  text-decoration: none;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  font-family: 'Inter', sans-serif !important;
+  letter-spacing: 0.01em;
+  transition: all .25s ease;
+  width: auto !important;
+  margin-bottom: 2px;
+}
+.sidebar .nav-item svg {
+  width: 17px; height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  flex-shrink: 0;
+  transition: transform .25s ease;
+  margin-right: 0 !important;
+}
+
+/* sliding accent bar */
+.sidebar .nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 2px; height: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: height .25s ease;
+}
+
+.sidebar .nav-item:hover,
+.sidebar .nav-item:focus {
+  color: var(--ink-0) !important;
+  background: var(--accent-dim) !important;
+  letter-spacing: 0.035em;
+}
+.sidebar .nav-item:hover svg,
+.sidebar .nav-item:focus svg { transform: translateX(2px); color: var(--ink-0) !important; }
+.sidebar .nav-item:hover::before,
+.sidebar .nav-item:focus::before { height: 60%; }
+
+.sidebar .nav-item.active {
+  color: var(--ink-0) !important;
+  background: var(--accent-dim) !important;
+  letter-spacing: 0.035em;
+}
+.sidebar .nav-item.active::before { height: 70%; background: var(--gold); }
+.sidebar .nav-item.active svg { color: var(--ink-0) !important; }
+
+.sidebar .nav-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 18px 6px;
+}
