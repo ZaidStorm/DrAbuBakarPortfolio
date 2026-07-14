@@ -355,4 +355,112 @@
     });
   }
 
+  /**
+   * Sidebar Scroll Progress Theme
+   */
+  const rootElement = document.documentElement;
+  let scrollTicking = false;
+
+  // Read colors from CSS
+  function getScrollColors() {
+    const style = getComputedStyle(rootElement);
+    const colors = [];
+    for (let i = 1; i <= 6; i++) {
+      const colorVal = style.getPropertyValue(`--scroll-color-${i}`).trim();
+      if (colorVal) {
+        const rgb = colorVal.split(',').map(Number);
+        if (rgb.length === 3 && !isNaN(rgb[0])) {
+          colors.push(rgb);
+        }
+      }
+    }
+    // Fallback colors just in case CSS hasn't loaded or missing variables
+    return colors.length > 0 ? colors : [
+      [127, 168, 150], [201, 138, 91], [122, 147, 201], 
+      [199, 162, 74], [164, 121, 201], [220, 80, 110]
+    ];
+  }
+
+  let colorStops = [];
+  
+  // init color stops when page loads fully so CSS variables are accessible
+  window.addEventListener('load', () => {
+    const scrollColors = getScrollColors();
+    colorStops = scrollColors.map((color, index) => {
+      return {
+        at: index / (scrollColors.length - 1 || 1),
+        color: color
+      };
+    });
+    updateSidebarColor();
+  });
+
+  // linear interpolation between two [r,g,b] arrays
+  function lerpColor(c1, c2, t){
+    return c1.map((v, i) => Math.round(v + (c2[i] - v) * t));
+  }
+
+  function colorAtProgress(p){
+    if (colorStops.length === 0) return [127, 168, 150]; // fallback before load
+    for (let i = 0; i < colorStops.length - 1; i++){
+      const a = colorStops[i], b = colorStops[i + 1];
+      if (p >= a.at && p <= b.at){
+        const t = (p - a.at) / (b.at - a.at);
+        return lerpColor(a.color, b.color, t);
+      }
+    }
+    return colorStops[colorStops.length - 1].color;
+  }
+
+  function updateSidebarColor(){
+    const scrollTop = window.scrollY;
+    // We calculate scrollable height based on the body scrollHeight minus viewport height
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+
+    const rgb = colorAtProgress(progress);
+    if(rgb && rgb.length === 3) {
+      rootElement.style.setProperty('--accent', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+      rootElement.style.setProperty('--accent-dim', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.14)`);
+    }
+    scrollTicking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking){
+      requestAnimationFrame(updateSidebarColor);
+      scrollTicking = true;
+    }
+  });
+
+  // ============================================================
+  // SIDEBAR BACKGROUND — bokeh particle generator
+  // ============================================================
+  function initNavBokeh(navSelector = '.sidebar', particleCount = 14) {
+    const nav = document.querySelector(navSelector);
+    if (!nav) return;
+
+    const layer = document.createElement('div');
+    layer.className = 'bokeh-layer';
+    nav.appendChild(layer);
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      const size = 4 + Math.random() * 8; // 4px - 12px
+
+      particle.className = 'particle';
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.animationDelay = `${Math.random() * 10}s`;
+      particle.style.animationDuration = `${8 + Math.random() * 8}s`; // 8s - 16s
+
+      layer.appendChild(particle);
+    }
+  }
+
+  window.addEventListener('load', () => {
+    initNavBokeh('.sidebar', 14);
+  });
+
 })();
