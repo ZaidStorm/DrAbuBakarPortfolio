@@ -2,40 +2,48 @@
  * functions/api/videos.js - GET /api/videos
  * Cloudflare Pages Function.
  *
- * Returns all video files inside the "videos" subfolder of the portfolio Drive folder.
- * The front-end (main.js) expects:
- *   { files: [{ id, name, type, src, link }] }
+ * Returns all video files inside the "videos" folder shared with the service account.
+ * The "videos" folder lives at the root of Drive (sibling of "portfolio", not inside it).
  *
- * Drive folder structure expected:
- *   portfolio/
- *     videos/
- *       hero-bg.mp4      <-- matched by name includes "hero"
- *       about-video.mp4  <-- matched by name includes "about"
+ * Drive structure:
+ *   My Drive/
+ *     portfolio/       <- category folders for the portfolio grid
+ *     videos/          <- hero-bg.mp4, about-video.mp4, etc.
+ *
+ * front-end (main.js) expects:
+ *   { files: [{ id, name, type, src, link }] }
+ * and matches files by name:
+ *   name includes "hero"  -> hero background video
+ *   name includes "about" -> about-section video
  */
-import { getAccessToken, driveList, getRootFolderId, jsonResponse } from '../_driveAuth.js';
+import { getAccessToken, driveList, jsonResponse } from '../_driveAuth.js';
+
+// Hardcoded videos folder ID — fill in after first run, or leave empty to search by name
+const VIDEOS_FOLDER_ID = '';
 
 export async function onRequestGet({ env }) {
   try {
-    const token  = await getAccessToken(env);
-    const rootId = getRootFolderId(env);
+    const token = await getAccessToken(env);
 
-    // 1. Find the "videos" subfolder inside portfolio/
-    const foldersData = await driveList(token, {
-      q: `'${rootId}' in parents and name = 'videos' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-      fields: 'files(id,name)',
-      pageSize: '5',
-    });
+    let videosFolderId = (env.VIDEOS_FOLDER_ID || VIDEOS_FOLDER_ID).trim();
 
-    const folders = foldersData.files || [];
+    // If no ID hardcoded, search Drive by folder name
+    if (!videosFolderId) {
+      const searchData = await driveList(token, {
+        q: `name = 'videos' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+        fields: 'files(id,name)',
+        pageSize: '5',
+      });
 
-    if (folders.length === 0) {
-      // No videos folder found — return empty so main.js gracefully skips
-      return jsonResponse({ files: [] });
+      const found = (searchData.files || [])[0];
+      if (!found) {
+        console.warn('[/api/videos] "videos" folder not found in Drive');
+        return jsonResponse({ files: [] });
+      }
+      videosFolderId = found.id;
     }
 
-    const videosFolderId = folders[0].id;
-
-    // 2. List all video files inside it
+    // List all video files inside the videos folder
     const filesData = await driveList(token, {
       q: `'${videosFolderId}' in parents and mimeType contains 'video/' and trashed = false`,
       fields: 'files(id,name,mimeType)',
