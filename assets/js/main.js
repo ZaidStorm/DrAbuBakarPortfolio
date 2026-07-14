@@ -311,24 +311,7 @@
     videoObserver.observe(aboutVideo);
   }
 
-  /**
-   * Hero video — mute / unmute toggle
-   */
-  const soundBtn = document.getElementById('video-sound-btn');
-  const heroVideo = document.querySelector('.hero video');
-  if (soundBtn && heroVideo) {
-    soundBtn.addEventListener('click', function () {
-      heroVideo.muted = !heroVideo.muted;
-      const icon = soundBtn.querySelector('i');
-      if (heroVideo.muted) {
-        icon.className = 'bi bi-volume-mute-fill';
-        soundBtn.title = 'Unmute video';
-      } else {
-        icon.className = 'bi bi-volume-up-fill';
-        soundBtn.title = 'Mute video';
-      }
-    });
-  }
+
 
   /**
    * Contact Form — EmailJS
@@ -371,59 +354,5 @@
         });
     });
   }
-
-  /**
-   * Load Hero and About videos dynamically from Google Drive (folder: 'videos')
-   */
-  async function loadDynamicVideos() {
-    try {
-      const API = window.DRIVE_API_BASE || '';
-      let res = await fetch(`${API}/api/videos`);
-
-      if (!res.ok) {
-        console.warn('Could not fetch videos from /api/videos.');
-        return;
-      }
-      
-      const data = await res.json();
-      const files = data.files || [];
-      
-      const heroFile = files.find(f => f.name.includes('herp-bg') || f.name.includes('hero'));
-      if (heroFile) {
-        const heroVideo = document.querySelector('.hero-video-wrapper video');
-        if (heroVideo) {
-          heroVideo.src = heroFile.src;
-          heroVideo.load();
-          
-          const handleLoaded = () => {
-            heroVideo.classList.add('is-loaded');
-            const loader = document.getElementById('hero-video-loader');
-            if (loader) loader.classList.add('hidden');
-          };
-          
-          heroVideo.addEventListener('canplay', handleLoaded);
-          if (heroVideo.readyState >= 3) {
-            handleLoaded();
-          }
-          
-          heroVideo.play().catch(e => console.log('Autoplay blocked:', e));
-        }
-      }
-      
-      const aboutFile = files.find(f => f.name.includes('about'));
-      if (aboutFile) {
-        const aboutVideo = document.getElementById('about-video');
-        if (aboutVideo) {
-          aboutVideo.src = aboutFile.src;
-          aboutVideo.load();
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load dynamic videos from Drive:', err);
-    }
-  }
-
-  // Fetch videos after page load
-  window.addEventListener('load', loadDynamicVideos);
 
 })();
