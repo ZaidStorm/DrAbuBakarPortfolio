@@ -1,4 +1,4 @@
-﻿/**
+/**
  * portfolio.js — Google Drive Edition
  *
  * Replaces the static portfolioItems / portfolio-data.js approach.
@@ -22,7 +22,8 @@
   // ── DOM refs ─────────────────────────────────────────────────────────────────
   const layoutEl       = document.querySelector('.portfolio .isotope-layout');
   const container      = document.querySelector('.portfolio .isotope-container');
-  const filtersWrapper = document.querySelector('.portfolio-filters-container');
+  // filtersWrapper now points to the nav-shell's scroll element that wraps the ul
+  const filtersWrapper = document.getElementById('pfNavScroll');
 
   if (!container) return; // portfolio section not on this page
 
@@ -57,12 +58,13 @@
     const hasRandom = folders.some(f => f.name === 'Random');
     const defaultFilter = hasRandom ? '.filter-random' : '*';
 
-    const items = folders.map((f, i) => {
+    const liItems = folders.map((f, i) => {
       const activeClass = (i === 0) ? ' class="filter-active"' : '';
       return `<li data-filter=".${f.slug.startsWith('filter-') ? f.slug : 'filter-' + f.slug}"${activeClass}>${f.name}</li>`;
     }).join('\n            ');
 
-    ul.innerHTML = items;
+    // Rebuild list items but keep the nav-indicator div at the end
+    ul.innerHTML = liItems + '<div class="nav-indicator" id="pfIndicator"></div>';
 
     // Update data-default-filter so main.js Isotope re-layout picks it up
     if (layoutEl) layoutEl.setAttribute('data-default-filter', defaultFilter);
@@ -113,8 +115,8 @@
         filter:       defaultFilter || '.filter-random',
       });
 
-      // Re-bind filter buttons
-      const filterBtns = document.querySelectorAll('.portfolio-filters-container .isotope-filters li');
+      // Re-bind filter buttons (uses new nav-shell selector)
+      const filterBtns = document.querySelectorAll('#pfNavScroll .isotope-filters li');
       filterBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
           const active = document.querySelector('.portfolio-filters .filter-active');
@@ -125,8 +127,8 @@
         });
       });
 
-      // Re-init filter pagination (mirrors main.js logic for > 8 filters)
-      reinitFilterPagination();
+      // Re-init nav-shell indicator
+      reinitNavShell();
 
       // Re-init GLightbox so new items get the lightbox treatment
       if (typeof GLightbox === 'function') {
@@ -138,48 +140,17 @@
     });
   }
 
-  // ── Filter pagination re-init (mirrors main.js FilterTabsPagination) ─────────
-  function reinitFilterPagination() {
-    if (!filtersWrapper) return;
-    const filtersList = filtersWrapper.querySelector('.portfolio-filters');
-    if (!filtersList) return;
+  // ── Nav-shell re-init after dynamic filter rebuild ────────────────────────────
+  function reinitNavShell() {
+    const indicator = document.getElementById('pfIndicator');
+    if (!indicator || !filtersWrapper) return;
 
-    const items    = Array.from(filtersList.querySelectorAll('li'));
-    const prevBtn  = filtersWrapper.querySelector('.filter-prev');
-    const nextBtn  = filtersWrapper.querySelector('.filter-next');
-    const PER_PAGE = 8;
+    const activeTab = filtersWrapper.querySelector('.isotope-filters li.filter-active')
+                   || filtersWrapper.querySelector('.isotope-filters li');
+    if (!activeTab) return;
 
-    if (items.length <= PER_PAGE || !prevBtn || !nextBtn) {
-      // Not enough items for pagination — show all
-      items.forEach(el => el.style.display = '');
-      if (prevBtn) prevBtn.classList.add('d-none');
-      if (nextBtn) nextBtn.classList.add('d-none');
-      return;
-    }
-
-    prevBtn.classList.remove('d-none');
-    nextBtn.classList.remove('d-none');
-
-    // Remove old listeners by cloning nodes
-    const newPrev = prevBtn.cloneNode(true);
-    const newNext = nextBtn.cloneNode(true);
-    prevBtn.replaceWith(newPrev);
-    nextBtn.replaceWith(newNext);
-
-    let page = 0;
-    const totalPages = Math.ceil(items.length / PER_PAGE);
-
-    function update() {
-      items.forEach((el, i) => {
-        el.style.display = (i >= page * PER_PAGE && i < (page + 1) * PER_PAGE) ? 'inline-block' : 'none';
-      });
-      newPrev.disabled = page === 0;
-      newNext.disabled = page === totalPages - 1;
-    }
-
-    newPrev.addEventListener('click', () => { if (page > 0) { page--; update(); } });
-    newNext.addEventListener('click', () => { if (page < totalPages - 1) { page++; update(); } });
-    update();
+    indicator.style.left  = activeTab.offsetLeft + 'px';
+    indicator.style.width = activeTab.offsetWidth + 'px';
   }
 
   // ── Main async loader ─────────────────────────────────────────────────────────

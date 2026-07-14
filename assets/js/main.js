@@ -160,58 +160,62 @@
   });
 
   /**
-   * Filter Tabs Pagination
+   * Portfolio Nav Shell — scrollable tab strip with indicator & arrows
    */
-  const filterContainers = document.querySelectorAll('.portfolio-filters-container');
-  filterContainers.forEach(container => {
-    const filtersList = container.querySelector('.portfolio-filters');
-    if (!filtersList) return;
+  (function () {
+    const scrollEl   = document.getElementById('pfNavScroll');
+    const filtersList = scrollEl && scrollEl.querySelector('.portfolio-filters');
+    if (!scrollEl || !filtersList) return;
 
-    const items = Array.from(filtersList.querySelectorAll('li'));
-    const prevBtn = container.querySelector('.filter-prev');
-    const nextBtn = container.querySelector('.filter-next');
+    const tabs       = Array.from(filtersList.querySelectorAll('li'));
+    const indicator  = document.getElementById('pfIndicator');
+    const arrowLeft  = document.getElementById('pfArrowLeft');
+    const arrowRight = document.getElementById('pfArrowRight');
+    const fadeLeft   = document.getElementById('pfFadeLeft');
+    const fadeRight  = document.getElementById('pfFadeRight');
 
-    const ITEMS_PER_PAGE = 8;
-
-    if (items.length <= ITEMS_PER_PAGE || !prevBtn || !nextBtn) {
-      return;
+    /* ── Indicator position ─────────────────────────────────── */
+    function moveIndicator(tab) {
+      if (!indicator) return;
+      // tab.offsetLeft is relative to filtersList; scrollEl scrollLeft shifts it
+      indicator.style.left  = tab.offsetLeft + 'px';
+      indicator.style.width = tab.offsetWidth + 'px';
     }
 
-    prevBtn.classList.remove('d-none');
-    nextBtn.classList.remove('d-none');
+    /* ── Arrow & fade state ─────────────────────────────────── */
+    function updateArrows() {
+      const max = scrollEl.scrollWidth - scrollEl.clientWidth - 1;
+      arrowLeft.disabled  = scrollEl.scrollLeft <= 0;
+      arrowRight.disabled = scrollEl.scrollLeft >= max;
+      if (fadeLeft)  fadeLeft.style.opacity  = arrowLeft.disabled  ? '0' : '1';
+      if (fadeRight) fadeRight.style.opacity = arrowRight.disabled ? '0' : '1';
+    }
 
-    let currentPage = 0;
-    const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-
-    function updatePagination() {
-      items.forEach((item, index) => {
-        if (index >= currentPage * ITEMS_PER_PAGE && index < (currentPage + 1) * ITEMS_PER_PAGE) {
-          item.style.display = 'inline-block';
-        } else {
-          item.style.display = 'none';
-        }
+    /* ── Tab click — handled here for indicator; Isotope click
+         is already bound in the block above via .isotope-filters li ── */
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        moveIndicator(this);
+        this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       });
-
-      prevBtn.disabled = currentPage === 0;
-      nextBtn.disabled = currentPage === totalPages - 1;
-    }
-
-    prevBtn.addEventListener('click', () => {
-      if (currentPage > 0) {
-        currentPage--;
-        updatePagination();
-      }
     });
 
-    nextBtn.addEventListener('click', () => {
-      if (currentPage < totalPages - 1) {
-        currentPage++;
-        updatePagination();
-      }
+    /* ── Arrow clicks ────────────────────────────────────────── */
+    arrowLeft.addEventListener('click',  function () { scrollEl.scrollBy({ left: -220, behavior: 'smooth' }); });
+    arrowRight.addEventListener('click', function () { scrollEl.scrollBy({ left:  220, behavior: 'smooth' }); });
+
+    scrollEl.addEventListener('scroll', updateArrows);
+    window.addEventListener('resize', function () {
+      const active = tabs.find(function (t) { return t.classList.contains('filter-active'); });
+      if (active) moveIndicator(active);
+      updateArrows();
     });
 
-    updatePagination();
-  });
+    /* ── Init ────────────────────────────────────────────────── */
+    const firstActive = tabs.find(function (t) { return t.classList.contains('filter-active'); }) || tabs[0];
+    if (firstActive) moveIndicator(firstActive);
+    updateArrows();
+  })();
 
   /**
    * Init swiper sliders

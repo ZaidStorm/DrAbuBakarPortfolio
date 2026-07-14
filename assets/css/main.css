@@ -896,76 +896,198 @@ section,
 }
 
 /*--------------------------------------------------------------
-# Portfolio Section
+# Portfolio Section — Scrollable Tab Nav
 --------------------------------------------------------------*/
-.portfolio-filters-container {
+
+/* ── Shell wrapper ─────────────────────────────────────────── */
+.portfolio .nav-shell {
+  position: relative;
+  background: var(--surface-color);
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 88%);
+  border-radius: 14px;
+  padding: 6px 52px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 30px;
+}
+
+/* ── Scroll track & strip ──────────────────────────────────── */
+.portfolio .nav-track {
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio .nav-scroll {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 4px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 12px 2px;
 }
+.portfolio .nav-scroll::-webkit-scrollbar { display: none; }
 
-.filter-nav-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: var(--default-color);
-  cursor: pointer;
-  transition: 0.3s;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ── Edge fade overlays ────────────────────────────────────── */
+.portfolio .nav-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 36px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.2s ease;
 }
+.portfolio .nav-fade.left  { left:  0; background: linear-gradient(to right, var(--surface-color), transparent); }
+.portfolio .nav-fade.right { right: 0; background: linear-gradient(to left,  var(--surface-color), transparent); }
 
-.filter-nav-btn:hover {
-  color: var(--accent-color);
-}
-
-.filter-nav-btn:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
-}
-
+/* ── Tab items (the <li> filter buttons) ──────────────────── */
 .portfolio .portfolio-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 0;
-  margin: 0 auto;
+  margin: 0;
   list-style: none;
-  text-align: center;
+  position: relative;
 }
 
 .portfolio .portfolio-filters li {
+  position: relative;
+  flex: 0 0 auto;
   cursor: pointer;
-  display: inline-block;
-  padding: 0;
-  font-size: 14px;
-  font-weight: 400;
-  margin: 0 10px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  font-family: var(--nav-font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  transition: all 0.3s ease-in-out;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--default-color), transparent 35%);
+  border-radius: 8px;
+  margin: 0;
+  line-height: 1;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
-.portfolio .portfolio-filters li:hover,
+/* dot accent before each item */
+.portfolio .portfolio-filters li::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--default-color), transparent 70%);
+  flex: 0 0 auto;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.portfolio .portfolio-filters li:hover {
+  color: var(--default-color);
+  background: color-mix(in srgb, var(--accent-color), transparent 90%);
+}
+
 .portfolio .portfolio-filters li.filter-active {
+  color: var(--default-color);
+  font-weight: 600;
+}
+.portfolio .portfolio-filters li.filter-active::before {
+  background: var(--accent-color);
+  transform: scale(1.35);
+}
+
+/* ── Sliding underline indicator ──────────────────────────── */
+.portfolio .nav-indicator {
+  position: absolute;
+  bottom: -2px;
+  height: 2.5px;
+  background: var(--accent-color);
+  border-radius: 2px;
+  transition: left 0.35s cubic-bezier(0.65, 0, 0.35, 1),
+              width 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+}
+
+/* ── Arrow scroll buttons ─────────────────────────────────── */
+.portfolio .nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
+  background: var(--surface-color);
+  color: var(--default-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.2s ease;
+  z-index: 3;
+  padding: 0;
+}
+.portfolio .nav-arrow.left  { left:  10px; }
+.portfolio .nav-arrow.right { right: 10px; }
+.portfolio .nav-arrow:hover {
+  background: color-mix(in srgb, var(--accent-color), transparent 88%);
+  border-color: var(--accent-color);
   color: var(--accent-color);
 }
-
-.portfolio .portfolio-filters li:first-child {
-  margin-left: 0;
+.portfolio .nav-arrow:active { transform: translateY(-50%) scale(0.92); }
+.portfolio .nav-arrow:disabled {
+  opacity: 0.28;
+  cursor: default;
+  background: var(--surface-color);
+  border-color: color-mix(in srgb, var(--default-color), transparent 80%);
+  color: var(--default-color);
 }
+.portfolio .nav-arrow svg { width: 15px; height: 15px; }
 
-.portfolio .portfolio-filters li:last-child {
-  margin-right: 0;
-}
-
-@media (max-width: 575px) {
-  .portfolio .portfolio-filters li {
-    font-size: 14px;
-    margin: 0 5px;
+/* ── Mobile: pill chips ───────────────────────────────────── */
+@media (max-width: 640px) {
+  .portfolio .nav-shell {
+    padding: 10px 0;
+    border-radius: 16px;
   }
+
+  .portfolio .nav-arrow { display: none; }
+  .portfolio .nav-fade  { width: 18px; }
+
+  .portfolio .nav-scroll {
+    padding: 4px 14px;
+    gap: 8px;
+    scroll-snap-type: x proximity;
+  }
+
+  .portfolio .nav-indicator { display: none; }
+
+  .portfolio .portfolio-filters {
+    gap: 8px;
+  }
+
+  .portfolio .portfolio-filters li {
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--default-color), transparent 80%);
+    padding: 7px 14px;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    scroll-snap-align: start;
+  }
+
+  .portfolio .portfolio-filters li::before { display: none; }
+
+  .portfolio .portfolio-filters li.filter-active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+  }
+}
+
+/* ── Legacy filter-nav-btn (kept for portfolio.js compatibility) */
+.filter-nav-btn {
+  display: none;
 }
 
 .portfolio .portfolio-content {

@@ -119,9 +119,7 @@
         <div class="hero-video-loader" id="hero-video-loader">
 
         </div>
-        <video autoplay loop muted playsinline data-aos="fade-in" class="hero-video-element">
-          <!-- Source will be loaded dynamically from Google Drive -->
-        </video>
+
       </div>
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -145,7 +143,7 @@
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
         <h2>About</h2>
-        <p>I am workign as a Consultant Dental Surgeon at Dental Rehab, Sahiwal. I am very passionate about my work. A
+        <p>I am working as a Consultant Dental Surgeon at Dental Rehab, Sahiwal. I am very passionate about my work. A
           part time Youtuber making some interesting videos on Dentistry.
         </p>
       </div><!-- End Section Title -->
@@ -520,55 +518,75 @@
         <div class="isotope-layout" data-default-filter=".filter-random" data-layout="masonry"
           data-sort="original-order">
 
-          <div class="portfolio-filters-container d-flex align-items-center justify-content-center gap-2 mb-4">
-            <button class="filter-nav-btn filter-prev d-none"><i class="bi bi-chevron-left"></i></button>
-            <ul class="portfolio-filters isotope-filters mb-0" data-aos="fade-up" data-aos-delay="100">
-              <li data-filter=".filter-random" class="filter-active">Random</li>
-              <li data-filter=".filter-alighners">Alighners</li>
-              <li data-filter=".filter-camp">Camp</li>
-              <li data-filter=".filter-compoo-veneer">Compoo Veneer</li>
-              <li data-filter=".filter-crowns-and-bridges">Crowns and Bridges</li>
-              <li data-filter=".filter-crowns-and-bridges-1">Crowns and Bridges 1</li>
-              <li data-filter=".filter-crowns-and-bridges-2">Crowns and Bridges 2</li>
-              <li data-filter=".filter-crowns-and-bridges-3">Crowns and Bridges 3</li>
-              <li data-filter=".filter-crowns-and-bridges-4">Crowns and Bridges 4</li>
-              <li data-filter=".filter-crowns-and-bridges-5">Crowns and Bridges 5</li>
-              <li data-filter=".filter-dry-socket">Dry Socket</li>
-              <li data-filter=".filter-endo-2026">Endo 2026</li>
-              <li data-filter=".filter-farewell">Farewell</li>
-              <li data-filter=".filter-implant">Implant</li>
-              <li data-filter=".filter-implant-1">Implant 1</li>
-              <li data-filter=".filter-implant-2">Implant 2</li>
-              <li data-filter=".filter-omfs">OMFS</li>
-              <li data-filter=".filter-ots">OTs</li>
-              <li data-filter=".filter-perio">Perio</li>
-              <li data-filter=".filter-prostho">Prostho</li>
-              <li data-filter=".filter-rct">RCT</li>
-              <li data-filter=".filter-rct-a">RCT A</li>
-              <li data-filter=".filter-rct-b">RCT B</li>
-              <li data-filter=".filter-rct-c">RCT C</li>
-              <li data-filter=".filter-rct-d">RCT D</li>
-              <li data-filter=".filter-rct-e">RCT E</li>
-              <li data-filter=".filter-rct-f">RCT F</li>
-              <li data-filter=".filter-rct-g">RCT G</li>
-              <li data-filter=".filter-rct-h">RCT H</li>
-              <li data-filter=".filter-rct-i">RCT I</li>
-              <li data-filter=".filter-rct-j">RCT J</li>
-              <li data-filter=".filter-rct-k">RCT K</li>
-              <li data-filter=".filter-rct-l">RCT L</li>
-              <li data-filter=".filter-rct-m">RCT M</li>
-              <li data-filter=".filter-rct-n">RCT N</li>
-              <li data-filter=".filter-rct-o">RCT O</li>
-              <li data-filter=".filter-rct-p">RCT P</li>
-              <li data-filter=".filter-rct-q">RCT Q</li>
-              <li data-filter=".filter-rct-r">RCT R</li>
-              <li data-filter=".filter-restoration-case">Restoration Case</li>
-              <li data-filter=".filter-restoration-case-1">Restoration Case 1</li>
-              <li data-filter=".filter-sialolith">Sialolith</li>
-              <li data-filter=".filter-stamp-tech">STAMP tech</li>
-            </ul><!-- End Portfolio Filters -->
-            <button class="filter-nav-btn filter-next d-none"><i class="bi bi-chevron-right"></i></button>
-          </div><!-- End Portfolio Filters Container -->
+          <!-- New scrollable tab nav -->
+          <div class="nav-shell">
+            <button class="nav-arrow left" id="pfArrowLeft" aria-label="Scroll categories left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="nav-track">
+              <div class="nav-fade left" id="pfFadeLeft"></div>
+              <div class="nav-scroll" id="pfNavScroll">
+                <ul class="portfolio-filters isotope-filters mb-0" data-aos="fade-up" data-aos-delay="100">
+                  <li data-filter=".filter-random" class="filter-active">Random</li>
+                  <li data-filter=".filter-alighners">Alighners</li>
+                  <li data-filter=".filter-camp">Camp</li>
+                  <li data-filter=".filter-compoo-veneer">Compoo Veneer</li>
+                  <li data-filter=".filter-crowns-and-bridges">Crowns and Bridges</li>
+                  <li data-filter=".filter-crowns-and-bridges-1">Crowns and Bridges 1</li>
+                  <li data-filter=".filter-crowns-and-bridges-2">Crowns and Bridges 2</li>
+                  <li data-filter=".filter-crowns-and-bridges-3">Crowns and Bridges 3</li>
+                  <li data-filter=".filter-crowns-and-bridges-4">Crowns and Bridges 4</li>
+                  <li data-filter=".filter-crowns-and-bridges-5">Crowns and Bridges 5</li>
+                  <li data-filter=".filter-dry-socket">Dry Socket</li>
+                  <li data-filter=".filter-endo-2026">Endo 2026</li>
+                  <li data-filter=".filter-farewell">Farewell</li>
+                  <li data-filter=".filter-implant">Implant</li>
+                  <li data-filter=".filter-implant-1">Implant 1</li>
+                  <li data-filter=".filter-implant-2">Implant 2</li>
+                  <li data-filter=".filter-omfs">OMFS</li>
+                  <li data-filter=".filter-ots">OTs</li>
+                  <li data-filter=".filter-perio">Perio</li>
+                  <li data-filter=".filter-prostho">Prostho</li>
+                  <li data-filter=".filter-rct">RCT</li>
+                  <li data-filter=".filter-rct-a">RCT A</li>
+                  <li data-filter=".filter-rct-b">RCT B</li>
+                  <li data-filter=".filter-rct-c">RCT C</li>
+                  <li data-filter=".filter-rct-d">RCT D</li>
+                  <li data-filter=".filter-rct-e">RCT E</li>
+                  <li data-filter=".filter-rct-f">RCT F</li>
+                  <li data-filter=".filter-rct-g">RCT G</li>
+                  <li data-filter=".filter-rct-h">RCT H</li>
+                  <li data-filter=".filter-rct-i">RCT I</li>
+                  <li data-filter=".filter-rct-j">RCT J</li>
+                  <li data-filter=".filter-rct-k">RCT K</li>
+                  <li data-filter=".filter-rct-l">RCT L</li>
+                  <li data-filter=".filter-rct-m">RCT M</li>
+                  <li data-filter=".filter-rct-n">RCT N</li>
+                  <li data-filter=".filter-rct-o">RCT O</li>
+                  <li data-filter=".filter-rct-p">RCT P</li>
+                  <li data-filter=".filter-rct-q">RCT Q</li>
+                  <li data-filter=".filter-rct-r">RCT R</li>
+                  <li data-filter=".filter-restoration-case">Restoration Case</li>
+                  <li data-filter=".filter-restoration-case-1">Restoration Case 1</li>
+                  <li data-filter=".filter-sialolith">Sialolith</li>
+                  <li data-filter=".filter-stamp-tech">STAMP tech</li>
+                  <div class="nav-indicator" id="pfIndicator"></div>
+                </ul>
+              </div>
+              <div class="nav-fade right" id="pfFadeRight"></div>
+            </div>
+
+            <button class="nav-arrow right" id="pfArrowRight" aria-label="Scroll categories right">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div><!-- End portfolio nav shell -->
 
           <div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">
 
